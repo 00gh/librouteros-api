@@ -111,9 +111,11 @@ Port is usually ROS_PORT (8729).
 
 A wrapper around close(). Please use this, in case there will be any automatic cleanup in the future.
 
-### int ros_login(struct ros_connection *connection, char *username, char *password);
+### int ros_login(struct ros_connection *connection, char *username, char *password, int old_api);
 
-Before sending any commands, you should log in using ros_login(conn, "user", "password"). The function returns with a true value on success. False on failure.
+Before sending any commands, you should log in using ros_login(conn, "user", "password", "0 or 1"). The function returns with a true value on success. False on failure.
+After release 6.45.3 Old API authentication method will also no longer work.
+https://mikrotik.com/download/changelogs
 
 ### struct ros_result *ros_send_command_wait(struct ros_connection *connection, char *command, ...)
 

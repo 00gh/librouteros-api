@@ -796,7 +796,7 @@ struct ros_result *ros_send_command_wait(struct ros_connection *conn, char *comm
 }
 
 /* TODO: write with events */
-int ros_login(struct ros_connection *conn, char *username, char *password) {
+int ros_login(struct ros_connection *conn, char *username, char *password, int old_api) {
 	int result;
 	unsigned char buffer[1024];
 	char *userWord;
@@ -806,31 +806,37 @@ int ros_login(struct ros_connection *conn, char *username, char *password) {
 	char md5sum[17];
 	md5_state_t state;
 
-	res = ros_send_command_wait(conn, "/login", NULL);
-
 	memset(buffer, 0, sizeof(buffer));
 
-	challenge = ros_get(res, "=ret");
-	if (challenge == NULL) {
-		fprintf(stderr, "Error logging in. No challenge received\n");
-		exit(1);
+	if(old_api){
+		res = ros_send_command_wait(conn, "/login", NULL);
+
+		challenge = ros_get(res, "=ret");
+		if (challenge == NULL) {
+			fprintf(stderr, "Error logging in. No challenge received\n");
+			exit(1);
+		}
+		md5toBin(buffer + 1, challenge);
+
+		md5_init(&state);
+		md5_append(&state, buffer, 1);
+		md5_append(&state, (unsigned char *)password, strlen(password));
+		md5_append(&state, buffer + 1, 16);
+		md5_finish(&state, (md5_byte_t *)md5sum);
+		ros_result_free(res);
+
+		strcpy((char *)buffer, "00");
+		bintomd5((char *)buffer + 2, (unsigned char *)md5sum);
+
+		strcpy(passWord, "=response=");
+		strcat(passWord, (char *)buffer);
+		passWord[44] = '\0';
+
+	}else{
+		strcpy(passWord, "=password=");
+		strcat(passWord, password);
 	}
-	md5toBin(buffer + 1, challenge);
-
-	md5_init(&state);
-	md5_append(&state, buffer, 1);
-	md5_append(&state, (unsigned char *)password, strlen(password));
-	md5_append(&state, buffer + 1, 16);
-	md5_finish(&state, (md5_byte_t *)md5sum);
-	ros_result_free(res);
-
-	strcpy((char *)buffer, "00");
-	bintomd5((char *)buffer + 2, (unsigned char *)md5sum);
-
-	strcpy(passWord, "=response=");
-	strcat(passWord, (char *)buffer);
-	passWord[44] = '\0';
-
+	
 	userWord = malloc(sizeof(char) * (6 + strlen(username) + 1));
 	strcpy(userWord, "=name=");
 	strcat(userWord, username);

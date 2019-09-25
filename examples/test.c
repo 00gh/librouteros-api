@@ -41,7 +41,7 @@ int main(int argc, char **argv) {
 		return 1;
 	}
 
-	if (ros_login(conn, argv[2], argv[3])) {
+	if (ros_login(conn, argv[2], argv[3], 0)) {
 		struct ros_result *res;
 
 		printf("Interfaces:\n");
