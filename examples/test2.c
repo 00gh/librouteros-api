@@ -58,7 +58,7 @@ int main(int argc, char **argv) {
 	
 	ros_set_type(conn, ROS_EVENT);
 
-	if (ros_login(conn, argv[2], argv[3])) {
+	if (ros_login(conn, argv[2], argv[3], 0)) {
 		struct timeval timeout;
 
 		printf("Interfaces:\n");
