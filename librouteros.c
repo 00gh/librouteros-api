@@ -147,7 +147,7 @@ static int readLen(struct ros_connection *conn)
 			return -1;
 		}
 		printf("Less small packet: %d\n", *((int *)data));
-		return *((int *)data);
+		return ntohs(*((int *)data));
 	}
 	else {
 		return *((int *)data);
